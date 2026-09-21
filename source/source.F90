@@ -21583,7 +21583,6 @@ subroutine visres_rhs(mgrid,lgrid)
      dvx1_dx3 = rph*( (lgrid%prim(i_vx1,i-1,j,k+1)-lgrid%prim(i_vx1,i-1,j,k-1))*inv_dx3L &
               + (lgrid%prim(i_vx1,i,j,k+1)-lgrid%prim(i_vx1,i,j,k-1))*inv_dx3R )
      dvx3_dx3 = rph*( (lgrid%prim(i_vx3,i-1,j,k+1)-lgrid%prim(i_vx3,i-1,j,k-1))*inv_dx3L &
-              + (lgrid%prim(i_vx3,i-1,j,k+1)-lgrid%prim(i_vx3,i-1,j,k-1))*inv_dx3L &
               + (lgrid%prim(i_vx3,i,j,k+1)-lgrid%prim(i_vx3,i,j,k-1))*inv_dx3R )
 
 #else
@@ -23606,8 +23605,8 @@ end subroutine bcs_dns
 
       rho = lgrid%prim(i_rho,i,j,k)
       nus = lgrid%nus(i,j,k)+em11
-      Ddns = rho*nus
-     
+      Ddns = nus
+
 #ifdef USE_MHD
       eta = lgrid%eta(i,j,k)
 #endif
@@ -23618,32 +23617,6 @@ end subroutine bcs_dns
 #if sdims_make==3
       inv_dx3 = rp1/(lgrid%coords_x3(3,i,j,k+1)-lgrid%coords_x3(3,i,j,k))
 #endif
-      inv_dl2 = inv_dx1*inv_dx1+inv_dx2*inv_dx2+inv_dx3*inv_dx3
-#endif
-
-#ifdef NONUNIFORM_RADIAL_NODES
-      rmi = lgrid%r_x1(i,j,k)
-      rpl = lgrid%r_x1(i+1,j,k)
-      inv_dx1 = rp1/(rpl-rmi)
-#endif
-
-#if defined(GEOMETRY_2D_POLAR) || defined(GEOMETRY_2D_SPHERICAL)
-      r = lgrid%r(i,j,k)
-      inv_dx2 = rp1/r*inv_dx2
-      inv_dl2 = inv_dx1*inv_dx1+inv_dx2*inv_dx2
-#endif
-
-#ifdef GEOMETRY_2D_CYLINDRICAL
-#ifdef NONUNIFORM_RADIAL_NODES
-      inv_dx2 = rp1/(lgrid%coords_x2(2,i,j+1,k)-lgrid%coords_x2(2,i,j,k))
-#endif
-      inv_dl2 = inv_dx1*inv_dx1+inv_dx2*inv_dx2
-#endif
-
-#ifdef GEOMETRY_3D_SPHERICAL
-      r = lgrid%r(i,j,k)
-      inv_dx2 = rp1/r*inv_dx2
-      inv_dx3 = lgrid%inv_r_sin_theta(i,j,k)*inv_dx3
       inv_dl2 = inv_dx1*inv_dx1+inv_dx2*inv_dx2+inv_dx3*inv_dx3
 #endif
 
