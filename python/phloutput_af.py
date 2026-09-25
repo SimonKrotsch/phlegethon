@@ -91,17 +91,21 @@ def error(q_fine, q_coarse):
     return np.mean(np.abs(q_coarse-temp))
 
 def comp_error():
-    g30 = h5grid(-1, path = "grids_30")
-    g60 = h5grid(-1, path = "grids_60")
-    g120 = h5grid(-1, path = "grids_120")
-    g240 = h5grid(-1, path = "grids_240")
-    g480 = h5grid(-1, path = "grids_480")
+    g16 = h5grid(-1, path = "grids_16")
+    g32 = h5grid(-1, path = "grids_32")
+    g64 = h5grid(-1, path = "grids_64")
+    g128 = h5grid(-1, path = "grids_128")
+    g256 = h5grid(-1, path = "grids_256")
+    g512 = h5grid(-1, path = "grids_512")
 
-    err = [error(g60.temp(), g30.temp()), error(g120.temp(),
-            g60.temp()), error(g240.temp(), g120.temp()),
-            error(g480.temp(), g240.temp())]
-    cells = [30,60,120,240,480]
-    eoc = [(np.log(err[i] / err[i+1]))/(np.log(cells[i+1] / cells[i])) for i in range(3)]
+    err = [error(g32.temp(), g16.temp()), error(g64.temp(),
+            g32.temp()), error(g128.temp(), g64.temp()),
+            error(g256.temp(), g128.temp()), error(g512.temp(), g256.temp())]
+    cells = [16, 32, 64, 128, 256, 512]
+    eoc = [(np.log(err[i] / err[i+1]))/(np.log(cells[i+1] / cells[i])) for i in range(4)]
+    print("Error: ", err)
+    print("Eoc: ", eoc)
+
     return err, eoc
 
 # ---------------------------------------------------------------------------------------

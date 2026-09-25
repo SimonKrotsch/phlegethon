@@ -2,8 +2,8 @@ SRC = ../../source
 APPNAME = app
 
 #grid
-OPTS += nx1_make=30
-OPTS += nx2_make=30
+OPTS += nx1_make=512
+OPTS += nx2_make=512
 OPTS += ddx1_make=2
 OPTS += ddx2_make=2
 OPTS += ngc_make=2
