@@ -2,8 +2,8 @@ SRC = ../../source
 APPNAME = app
 
 #grid
-OPTS += nx1_make=512
-OPTS += nx2_make=512
+OPTS += nx1_make=64
+OPTS += nx2_make=64
 OPTS += ddx1_make=2
 OPTS += ddx2_make=2
 OPTS += ngc_make=2
@@ -18,13 +18,13 @@ OPTS += cfl_make=0.2_rp
 #output
 OPTS += OUTPUT_DT
 OPTS += dt_dump_make=5000_rp
-OPTS += info_terminal_rate_make=1
+OPTS += info_terminal_rate_make=10
 
 #stopping criteria200000_rp
 OPTS += tmax_make=20000_rp
 
 #use eos
-OPTS += eos_type_make=0
+OPTS += eos_type_make=1
 
 #parabolic source term
 OPTS += use_pst_make

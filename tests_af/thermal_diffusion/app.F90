@@ -86,6 +86,8 @@ program test
   end do
  end do
 
+
+
  do j=lbound(lgrid%q_cor,3),ubound(lgrid%q_cor,3)
   do i=lbound(lgrid%q_cor,2),ubound(lgrid%q_cor,2)
 
@@ -119,6 +121,19 @@ program test
 
      lgrid%q_x2(i_rho,i,j) = 1.0_rp
      lgrid%q_x2(i_rhoe,i,j) = 1.0_rp * CONST_RGAS * lgrid%t_x2(i,j) /(mu * (gamma_ad -1))
+
+  end do
+ end do
+
+ do j=lbound(lgrid%q_cc,3),ubound(lgrid%q_cc,3)
+  do i=lbound(lgrid%q_cc,2),ubound(lgrid%q_cc,2)
+
+
+     lgrid%q_cc(i_rhovx1,i,j) = 0
+     lgrid%q_cc(i_rhovx2,i,j) = 0
+
+     lgrid%q_cc(i_rho,i,j) = 1.0_rp
+     lgrid%q_cc(i_rhoe,i,j) = 1.0_rp * CONST_RGAS * lgrid%t_cc(i,j) /(mu * (gamma_ad -1))
 
   end do
  end do
