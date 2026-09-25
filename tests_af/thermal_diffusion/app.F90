@@ -93,7 +93,7 @@ program test
      lgrid%q_cor(i_rhovx2,i,j) = 0
 
      lgrid%q_cor(i_rho,i,j) = 1.0_rp
-     lgrid%q_cor(i_rhoe,i,j) = 1.0_rp * CONST_R * lgrid%t_cor(i,j) /(mu * (gamma_ad -1))
+     lgrid%q_cor(i_rhoe,i,j) = 1.0_rp * CONST_RGAS * lgrid%t_cor(i,j) /(mu * (gamma_ad -1))
 
   end do
  end do
@@ -105,7 +105,7 @@ program test
      lgrid%q_x1(i_rhovx2,i,j) = 0
 
      lgrid%q_x1(i_rho,i,j) = 1.0_rp
-     lgrid%q_x1(i_rhoe,i,j) = 1.0_rp * CONST_R * lgrid%t_x1(i,j) /(mu * (gamma_ad -1))
+     lgrid%q_x1(i_rhoe,i,j) = 1.0_rp * CONST_RGAS * lgrid%t_x1(i,j) /(mu * (gamma_ad -1))
 
   end do
  end do
@@ -118,7 +118,7 @@ program test
      lgrid%q_x2(i_rhovx2,i,j) = 0
 
      lgrid%q_x2(i_rho,i,j) = 1.0_rp
-     lgrid%q_x2(i_rhoe,i,j) = 1.0_rp * CONST_R * lgrid%t_x2(i,j) /(mu * (gamma_ad -1))
+     lgrid%q_x2(i_rhoe,i,j) = 1.0_rp * CONST_RGAS * lgrid%t_x2(i,j) /(mu * (gamma_ad -1))
 
   end do
  end do

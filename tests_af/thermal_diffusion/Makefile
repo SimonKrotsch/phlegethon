@@ -18,12 +18,13 @@ OPTS += cfl_make=0.2_rp
 #output
 OPTS += OUTPUT_DT
 OPTS += dt_dump_make=5000_rp
-OPTS += info_terminal_rate_make=10
+OPTS += info_terminal_rate_make=1
 
 #stopping criteria200000_rp
 OPTS += tmax_make=20000_rp
 
-
+#use eos
+OPTS += eos_type_make=0
 
 #parabolic source term
 OPTS += use_pst_make

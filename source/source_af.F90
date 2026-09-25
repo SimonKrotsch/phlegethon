@@ -203,7 +203,7 @@ integer, parameter :: eos_type = &
  real(kind=rp), parameter :: &
  CONST_PI = 3.141592653589793238_rp, &
  CONST_C = 2.99792458e10_rp, &
- CONST_RSUN = 6.95660e10_rp
+ CONST_RSUN = 6.95660e10_rp, &
  CONST_RAD = 7.565767381646406e-15_rp, &
  CONST_RGAS = 8.31446261815324e7_rp, &
  CONST_C2 = 8.987551787368177e20_rp
@@ -243,6 +243,9 @@ integer, parameter :: eos_type = &
 
     real(kind=rp), allocatable, dimension(:,:,:) :: &
     qbar_cc,q_x1,q_x2,q_cor,q_cc
+
+    real(kind=rp), allocatable, dimension(:,:,:) :: &
+    flux_x1,flux_x2,flux_cor
 
     !opacity
     real(kind=rp), allocatable, dimension(:,:) :: &
@@ -2531,57 +2534,65 @@ endif
 
        integer :: i,j
 
-       !real(kind=rp) :: energy
-       real(kind=rp) :: rho,rhovx1,rhovx2,rhoe,inv_rho,&
-       rhoeint,p,cs,H,T
+       real(kind=rp) :: energy
+       real(kind=rp) :: rho,vx1,vx2,rhoe,inv_rho,&
+       p,c,H,T
 
        ! compute the temperature
        do j=lbound(lgrid%t_cc,2),ubound(lgrid%t_cc,2)
         do i=lbound(lgrid%t_cc,1),ubound(lgrid%t_cc,1)
 
-            !compute the point values at the cell centre
-            !lgrid%qpv_cc(i_rho, i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_rho, i,j) &
-            !- rp4 * (lgrid%q_x1(i_rho,i,j) + lgrid%q_x1(i_rho,i+1,j) &
-            !+ lgrid%q_x2(i_rho,i,j) +  lgrid%q_x2(i_rho,i,j+1)) &
-            !- (lgrid%q_cor(i_rho,i,j) + lgrid%q_cor(i_rho,i+1,j) &
-            !+ lgrid%q_cor(i_rho,i,j+1) + lgrid%q_cor(i_rho,i+1,j+1)) &
-            !)
+            if (eos_type == 0) then
+
+                !compute the point values at the cell centre
+                !lgrid%qpv_cc(i_rho, i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_rho, i,j) &
+                !- rp4 * (lgrid%q_x1(i_rho,i,j) + lgrid%q_x1(i_rho,i+1,j) &
+                !+ lgrid%q_x2(i_rho,i,j) +  lgrid%q_x2(i_rho,i,j+1)) &
+                !- (lgrid%q_cor(i_rho,i,j) + lgrid%q_cor(i_rho,i+1,j) &
+                !+ lgrid%q_cor(i_rho,i,j+1) + lgrid%q_cor(i_rho,i+1,j+1)) &
+                !)
 
 
-            !lgrid%qpv_cc(i_vx1 , i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_vx1, i,j) &
-            !- rp4 * (lgrid%q_x1(i_vx1,i,j) + lgrid%q_x1(i_vx1,i+1,j) &
-            !+ lgrid%q_x2(i_vx1,i,j) +  lgrid%q_x2(i_vx1,i,j+1)) &
-            !- (lgrid%q_cor(i_vx1,i,j) + lgrid%q_cor(i_vx1,i+1,j) &
-            !+ lgrid%q_cor(i_vx1,i,j+1) + lgrid%q_cor(i_vx1,i+1,j+1)) &
-            !)
+                !lgrid%qpv_cc(i_vx1 , i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_vx1, i,j) &
+                !- rp4 * (lgrid%q_x1(i_vx1,i,j) + lgrid%q_x1(i_vx1,i+1,j) &
+                !+ lgrid%q_x2(i_vx1,i,j) +  lgrid%q_x2(i_vx1,i,j+1)) &
+                !- (lgrid%q_cor(i_vx1,i,j) + lgrid%q_cor(i_vx1,i+1,j) &
+                !+ lgrid%q_cor(i_vx1,i,j+1) + lgrid%q_cor(i_vx1,i+1,j+1)) &
+                !)
 
-            !lgrid%qpv_cc(i_vx2, i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_vx2, i,j) &
-            !- rp4 * (lgrid%q_x1(i_vx2,i,j) + lgrid%q_x1(i_vx2,i+1,j) &
-            !+ lgrid%q_x2(i_vx2,i,j) +  lgrid%q_x2(i_vx2,i,j+1)) &
-            !- (lgrid%q_cor(i_vx2,i,j) + lgrid%q_cor(i_vx2,i+1,j) &
-            !+ lgrid%q_cor(i_vx2,i,j+1) + lgrid%q_cor(i_vx2,i+1,j+1)) &
-            !)
+                !lgrid%qpv_cc(i_vx2, i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_vx2, i,j) &
+                !- rp4 * (lgrid%q_x1(i_vx2,i,j) + lgrid%q_x1(i_vx2,i+1,j) &
+                !+ lgrid%q_x2(i_vx2,i,j) +  lgrid%q_x2(i_vx2,i,j+1)) &
+                !- (lgrid%q_cor(i_vx2,i,j) + lgrid%q_cor(i_vx2,i+1,j) &
+                !+ lgrid%q_cor(i_vx2,i,j+1) + lgrid%q_cor(i_vx2,i+1,j+1)) &
+                !)
 
-            !lgrid%qpv_cc(i_rhoe, i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_rhoe, i,j) &
-            !- rp4 * (lgrid%q_x1(i_rhoe,i,j) + lgrid%q_x1(i_rhoe,i+1,j) &
-            !+ lgrid%q_x2(i_rhoe,i,j) +  lgrid%q_x2(i_rhoe,i,j+1)) &
-            !- (lgrid%q_cor(i_rhoe,i,j) + lgrid%q_cor(i_rhoe,i+1,j) &
-            !+ lgrid%q_cor(i_rhoe,i,j+1) + lgrid%q_cor(i_rhoe,i+1,j+1)) &
-            !)
+                !lgrid%qpv_cc(i_rhoe, i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_rhoe, i,j) &
+                !- rp4 * (lgrid%q_x1(i_rhoe,i,j) + lgrid%q_x1(i_rhoe,i+1,j) &
+                !+ lgrid%q_x2(i_rhoe,i,j) +  lgrid%q_x2(i_rhoe,i,j+1)) &
+                !- (lgrid%q_cor(i_rhoe,i,j) + lgrid%q_cor(i_rhoe,i+1,j) &
+                !+ lgrid%q_cor(i_rhoe,i,j+1) + lgrid%q_cor(i_rhoe,i+1,j+1)) &
+                !)
 
-            !energy = lgrid%q_cc(i_rhoe, i,j) - 0.5_rp * &
-            !(lgrid%q_cc(i_vx1, i,j) * lgrid%q_cc(i_vx1, i,j) + lgrid%q_cc(i_vx2, i,j) * lgrid%q_cc(i_vx2, i,j))&
-            !/lgrid%q_cc(i_rho, i,j)
+                energy = lgrid%q_cc(i_rhoe, i,j) - 0.5_rp * &
+                (lgrid%q_cc(i_vx1, i,j) * lgrid%q_cc(i_vx1, i,j) + lgrid%q_cc(i_vx2, i,j) * lgrid%q_cc(i_vx2, i,j))&
+                /lgrid%q_cc(i_rho, i,j)
+
+                T = lgrid%mu * (lgrid%gm - 1) *energy / (CONST_RGAS * lgrid%q_cc(i_rho, i,j))
+
+            else
+
+                rho = lgrid%q_cc(i_rho,i,j)
+                inv_rho = rp1/rho
+                vx1 = lgrid%q_cc(i_rhovx1,i,j)*inv_rho
+                vx2 = lgrid%q_cc(i_rhovx2,i,j)*inv_rho
+                rhoe = lgrid%q_cc(i_rhoe,i,j)
+                call get_fluid_state(rho, rhoe, vx1, vx2, lgrid%gm, lgrid%mu, p, c, H, T)
 
 
-            rho = lgrid%q_cc(i_rho,i,j)
-            inv_rho = rp1/rho
-            vx1 = lgrid%q_cc(i_rhovx1,i,j)*inv_rho
-            vx2 = lgrid%q_cc(i_rhovx2,i,j)*inv_rho
-            rhoe = lgrid%q_cc(i_rhoe,i,j)
-            call get_fluid_state(rho, rhoe, vx1, vx2, lgrid%gm, lgrid%mu, p, c, H, T)
+            endif
 
-            lgrid%t_cc(i,j) = T !lgrid%mu * (lgrid%gm - 1) *energy / (CONST_RGAS * lgrid%q_cc(i_rho, i,j))
+            lgrid%t_cc(i,j) = T
 
         end do
        end do
@@ -2589,18 +2600,24 @@ endif
        do j=lbound(lgrid%t_x1,2),ubound(lgrid%t_x1,2)
         do i=lbound(lgrid%t_x1,1),ubound(lgrid%t_x1,1)
 
-            !energy = lgrid%q_x1(i_rhoe, i,j) - 0.5_rp * &
-            !(lgrid%q_x1(i_vx1, i,j) * lgrid%q_x1(i_vx1, i,j) + lgrid%q_x1(i_vx2, i,j) * lgrid%q_x1(i_vx2, i,j)) &
-            !/lgrid%q_x1(i_rho, i,j)
+            if (eos_type == 0) then
 
-            rho = lgrid%q_x1(i_rho,i,j)
-            inv_rho = rp1/rho
-            vx1 = lgrid%q_x1(i_rhovx1,i,j)*inv_rho
-            vx2 = lgrid%q_x1(i_rhovx2,i,j)*inv_rho
-            rhoe = lgrid%q_x1(i_rhoe,i,j)
-            call get_fluid_state(rho, rhoe, vx1, vx2, lgrid%gm, lgrid%mu, p, c, H, T)
+                energy = lgrid%q_x1(i_rhoe, i,j) - 0.5_rp * &
+                (lgrid%q_x1(i_vx1, i,j) * lgrid%q_x1(i_vx1, i,j) + lgrid%q_x1(i_vx2, i,j) * lgrid%q_x1(i_vx2, i,j)) &
+                /lgrid%q_x1(i_rho, i,j)
 
-            lgrid%t_x1(i,j) = T !lgrid%mu * (lgrid%gm - 1) *energy / (CONST_RGAS * lgrid%q_x1(i_rho, i,j))
+                T = lgrid%mu * (lgrid%gm - 1) *energy / (CONST_RGAS * lgrid%q_x1(i_rho, i,j))
+
+            else
+                rho = lgrid%q_x1(i_rho,i,j)
+                inv_rho = rp1/rho
+                vx1 = lgrid%q_x1(i_rhovx1,i,j)*inv_rho
+                vx2 = lgrid%q_x1(i_rhovx2,i,j)*inv_rho
+                rhoe = lgrid%q_x1(i_rhoe,i,j)
+                call get_fluid_state(rho, rhoe, vx1, vx2, lgrid%gm, lgrid%mu, p, c, H, T)
+
+            endif
+            lgrid%t_x1(i,j) = T
 
         end do
        end do
@@ -2608,18 +2625,26 @@ endif
        do j=lbound(lgrid%t_x2,2),ubound(lgrid%t_x2,2)
         do i=lbound(lgrid%t_x2,1),ubound(lgrid%t_x2,1)
 
-            !energy = lgrid%q_x2(i_rhoe, i,j) - 0.5_rp * &
-            !(lgrid%q_x2(i_vx1, i,j) * lgrid%q_x2(i_vx1, i,j) + lgrid%q_x2(i_vx2, i,j) * lgrid%q_x2(i_vx2, i,j)) &
-            !/lgrid%q_x2(i_rho, i,j)
+            if (eos_type == 0) then
 
-            rho = lgrid%q_x2(i_rho,i,j)
-            inv_rho = rp1/rho
-            vx1 = lgrid%q_x2(i_rhovx1,i,j)*inv_rho
-            vx2 = lgrid%q_x2(i_rhovx2,i,j)*inv_rho
-            rhoe = lgrid%q_x2(i_rhoe,i,j)
-            call get_fluid_state(rho, rhoe, vx1, vx2, lgrid%gm, lgrid%mu, p, c, H, T)
+                energy = lgrid%q_x2(i_rhoe, i,j) - 0.5_rp * &
+                (lgrid%q_x2(i_vx1, i,j) * lgrid%q_x2(i_vx1, i,j) + lgrid%q_x2(i_vx2, i,j) * lgrid%q_x2(i_vx2, i,j)) &
+                /lgrid%q_x2(i_rho, i,j)
 
-            lgrid%t_x2(i,j) = T !lgrid%mu * (lgrid%gm - 1) *energy / (CONST_RGAS * lgrid%q_x2(i_rho, i,j))
+                T = lgrid%mu * (lgrid%gm - 1) *energy / (CONST_RGAS * lgrid%q_x2(i_rho, i,j))
+
+            else
+                rho = lgrid%q_x2(i_rho,i,j)
+                inv_rho = rp1/rho
+                vx1 = lgrid%q_x2(i_rhovx1,i,j)*inv_rho
+                vx2 = lgrid%q_x2(i_rhovx2,i,j)*inv_rho
+                rhoe = lgrid%q_x2(i_rhoe,i,j)
+                call get_fluid_state(rho, rhoe, vx1, vx2, lgrid%gm, lgrid%mu, p, c, H, T)
+
+            endif
+
+
+            lgrid%t_x2(i,j) = T
 
         end do
        end do
@@ -2627,18 +2652,23 @@ endif
        do j=lbound(lgrid%t_cor,2),ubound(lgrid%t_cor,2)
         do i=lbound(lgrid%t_cor,1),ubound(lgrid%t_cor,1)
 
-            !energy = lgrid%q_cor(i_rhoe, i,j) - 0.5_rp * &
-            !(lgrid%q_cor(i_vx1, i,j) * lgrid%q_cor(i_vx1, i,j) + lgrid%q_cor(i_vx2, i,j) * lgrid%q_cor(i_vx2, i,j)) &
-            !/lgrid%q_cor(i_rho, i,j)
+            if (eos_type == 0) then
+                energy = lgrid%q_cor(i_rhoe, i,j) - 0.5_rp * &
+                (lgrid%q_cor(i_vx1, i,j) * lgrid%q_cor(i_vx1, i,j) + lgrid%q_cor(i_vx2, i,j) * lgrid%q_cor(i_vx2, i,j)) &
+                /lgrid%q_cor(i_rho, i,j)
 
-            rho = lgrid%q_cor(i_rho,i,j)
-            inv_rho = rp1/rho
-            vx1 = lgrid%q_cor(i_rhovx1,i,j)*inv_rho
-            vx2 = lgrid%q_cor(i_rhovx2,i,j)*inv_rho
-            rhoe = lgrid%q_cor(i_rhoe,i,j)
-            call get_fluid_state(rho, rhoe, vx1, vx2, lgrid%gm, lgrid%mu, p, c, H, T)
+                T = lgrid%mu * (lgrid%gm - 1) *energy / (CONST_RGAS * lgrid%q_cor(i_rho, i,j))
 
-            lgrid%t_cor(i,j) = T !lgrid%mu * (lgrid%gm - 1) *energy / (CONST_RGAS * lgrid%q_cor(i_rho, i,j))
+            else
+                rho = lgrid%q_cor(i_rho,i,j)
+                inv_rho = rp1/rho
+                vx1 = lgrid%q_cor(i_rhovx1,i,j)*inv_rho
+                vx2 = lgrid%q_cor(i_rhovx2,i,j)*inv_rho
+                rhoe = lgrid%q_cor(i_rhoe,i,j)
+                call get_fluid_state(rho, rhoe, vx1, vx2, lgrid%gm, lgrid%mu, p, c, H, T)
+            endif
+
+            lgrid%t_cor(i,j) = T
 
         end do
        end do
@@ -3623,9 +3653,3 @@ endif
  end function str
 
 end module source
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> origin/active_flux
