@@ -779,6 +779,10 @@ contains
      offset(2) = 0
      call communicate_array(mgrid,nvars,lx1,ux1,lx2,ux2,ngc,lgrid%qbar_cc,offset,.false.)
 
+     offset(1) = 0
+     offset(2) = 0
+     call communicate_array(mgrid,nvars,lx1,ux1,lx2,ux2,ngc,lgrid%q_cc,offset,.false.)
+
      offset(1) = 1
      offset(2) = 0
      call communicate_array(mgrid,nvars,lx1,ux1+1,lx2,ux2,ngc,lgrid%q_x1,offset,.false.)
@@ -1142,7 +1146,7 @@ contains
 
 !---------------------------------------------------------------------------------------!
 ! compute the temperature
-call compute_temp(mgrid,lgrid)
+call compute_temp(lgrid)
 ! fix the boundary conditions of the temperature
 call fix_bc_temp()
 !---------------------------------------------------------------------------------------!
@@ -2290,7 +2294,7 @@ endif
  end subroutine fix_bc_temp
 
  !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
- ! COMPUTE PST
+ ! COMPUTE PST (parabolic source term)
  !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
  subroutine compute_pst(mgrid,lgrid)
@@ -2383,7 +2387,6 @@ endif
         + lgrid%q_cor(i_rho,i,j+1) + lgrid%q_cor(i_rho,i+1,j+1)) &
         )
 
-        !3.61e-5_rp *  CONST_R
         k_cc(i,j) =  fthirds * CONST_RAD * CONST_C * lgrid%t_cc(i,j) * lgrid%t_cc(i,j) * lgrid%t_cc(i,j) &
         / (lgrid%kap_cc(i,j) * rho_cc)
      end do
@@ -2528,12 +2531,9 @@ endif
     ! COMPUTE THE TEMPERATURE
     !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    subroutine compute_temp(mgrid,lgrid)
-       type(mpigrid), intent(inout) :: mgrid
+    subroutine compute_temp(lgrid)
        type(locgrid), intent(inout) :: lgrid
-
        integer :: i,j
-
        real(kind=rp) :: energy
        real(kind=rp) :: rho,vx1,vx2,rhoe,inv_rho,&
        p,c,H,T
@@ -2544,40 +2544,9 @@ endif
 
             if (eos_type == 0) then
 
-                !compute the point values at the cell centre
-                !lgrid%qpv_cc(i_rho, i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_rho, i,j) &
-                !- rp4 * (lgrid%q_x1(i_rho,i,j) + lgrid%q_x1(i_rho,i+1,j) &
-                !+ lgrid%q_x2(i_rho,i,j) +  lgrid%q_x2(i_rho,i,j+1)) &
-                !- (lgrid%q_cor(i_rho,i,j) + lgrid%q_cor(i_rho,i+1,j) &
-                !+ lgrid%q_cor(i_rho,i,j+1) + lgrid%q_cor(i_rho,i+1,j+1)) &
-                !)
-
-
-                !lgrid%qpv_cc(i_vx1 , i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_vx1, i,j) &
-                !- rp4 * (lgrid%q_x1(i_vx1,i,j) + lgrid%q_x1(i_vx1,i+1,j) &
-                !+ lgrid%q_x2(i_vx1,i,j) +  lgrid%q_x2(i_vx1,i,j+1)) &
-                !- (lgrid%q_cor(i_vx1,i,j) + lgrid%q_cor(i_vx1,i+1,j) &
-                !+ lgrid%q_cor(i_vx1,i,j+1) + lgrid%q_cor(i_vx1,i+1,j+1)) &
-                !)
-
-                !lgrid%qpv_cc(i_vx2, i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_vx2, i,j) &
-                !- rp4 * (lgrid%q_x1(i_vx2,i,j) + lgrid%q_x1(i_vx2,i+1,j) &
-                !+ lgrid%q_x2(i_vx2,i,j) +  lgrid%q_x2(i_vx2,i,j+1)) &
-                !- (lgrid%q_cor(i_vx2,i,j) + lgrid%q_cor(i_vx2,i+1,j) &
-                !+ lgrid%q_cor(i_vx2,i,j+1) + lgrid%q_cor(i_vx2,i+1,j+1)) &
-                !)
-
-                !lgrid%qpv_cc(i_rhoe, i,j) = osixteenth * (rp36 * lgrid%qbar_cc(i_rhoe, i,j) &
-                !- rp4 * (lgrid%q_x1(i_rhoe,i,j) + lgrid%q_x1(i_rhoe,i+1,j) &
-                !+ lgrid%q_x2(i_rhoe,i,j) +  lgrid%q_x2(i_rhoe,i,j+1)) &
-                !- (lgrid%q_cor(i_rhoe,i,j) + lgrid%q_cor(i_rhoe,i+1,j) &
-                !+ lgrid%q_cor(i_rhoe,i,j+1) + lgrid%q_cor(i_rhoe,i+1,j+1)) &
-                !)
-
                 energy = lgrid%q_cc(i_rhoe, i,j) - 0.5_rp * &
                 (lgrid%q_cc(i_vx1, i,j) * lgrid%q_cc(i_vx1, i,j) + lgrid%q_cc(i_vx2, i,j) * lgrid%q_cc(i_vx2, i,j))&
                 /lgrid%q_cc(i_rho, i,j)
-
                 T = lgrid%mu * (lgrid%gm - 1) *energy / (CONST_RGAS * lgrid%q_cc(i_rho, i,j))
 
             else
@@ -2586,9 +2555,8 @@ endif
                 inv_rho = rp1/rho
                 vx1 = lgrid%q_cc(i_rhovx1,i,j)*inv_rho
                 vx2 = lgrid%q_cc(i_rhovx2,i,j)*inv_rho
-                rhoe = lgrid%q_cc(i_rhoe,i,j)
+                rhoe = lgrid%q_cc(i_rhoe, i,j)
                 call get_fluid_state(rho, rhoe, vx1, vx2, lgrid%gm, lgrid%mu, p, c, H, T)
-
 
             endif
 
@@ -2672,7 +2640,6 @@ endif
 
         end do
        end do
-
 
     end subroutine compute_temp
 

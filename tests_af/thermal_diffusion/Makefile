@@ -23,14 +23,14 @@ OPTS += info_terminal_rate_make=10
 #stopping criteria200000_rp
 OPTS += tmax_make=20000_rp
 
-#use eos
+#eos
 OPTS += eos_type_make=1
 
 #parabolic source term
 OPTS += use_pst_make
-#use hydro
+#hydro
 OPTS += deactivate_hydro_make
-#use parabolic time step
+#parabolic time step
 OPTS += use_pb_dt_make
 
 #--------------------------------#
